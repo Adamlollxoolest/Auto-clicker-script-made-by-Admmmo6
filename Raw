@@ -1,0 +1,756 @@
+-- Universal Mobile & PC Auto-Clicker GUI (Auto clicker made by Admmmo6)
+local CoreGui = game:GetService("CoreGui")
+local UserInputService = game:GetService("UserInputService")
+local VirtualInputManager = game:GetService("VirtualInputManager")
+local GuiService = game:GetService("GuiService")
+local Players = game:GetService("Players")
+
+local player = Players.LocalPlayer
+local themeColor = Color3.fromRGB(0, 255, 127) -- Neon Green
+
+-- Create ScreenGui
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "AutoClickerGui_Admmmo6"
+screenGui.ResetOnSpawn = false
+screenGui.DisplayOrder = 999999
+
+local success = pcall(function()
+	screenGui.Parent = CoreGui
+end)
+if not success then
+	screenGui.Parent = player:WaitForChild("PlayerGui")
+end
+
+-- Main Frame (Expanded height to 370 to fit the new button safely)
+local frame = Instance.new("Frame")
+frame.Size = UDim2.new(0, 230, 0, 370)
+frame.Position = UDim2.new(0.5, -115, 0.12, 0)
+frame.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
+frame.BorderSizePixel = 0
+frame.Active = true
+frame.Draggable = true
+frame.Parent = screenGui
+
+local corner = Instance.new("UICorner")
+corner.CornerRadius = UDim.new(0, 8)
+corner.Parent = frame
+
+local stroke = Instance.new("UIStroke")
+stroke.Color = themeColor
+stroke.Thickness = 1.5
+stroke.Parent = frame
+
+-- Title
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1, -60, 0, 30)
+title.Position = UDim2.new(0, 8, 0, 0)
+title.BackgroundTransparency = 1
+title.Text = "Auto clicker made by Admmmo6"
+title.TextColor3 = themeColor
+title.TextSize = 11
+title.Font = Enum.Font.GothamBold
+title.TextXAlignment = Enum.TextXAlignment.Left
+title.Parent = frame
+
+-- Minimize Button (-)
+local minBtn = Instance.new("TextButton")
+minBtn.Size = UDim2.new(0, 22, 0, 22)
+minBtn.Position = UDim2.new(1, -52, 0, 4)
+minBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
+minBtn.Text = "-"
+minBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
+minBtn.TextSize = 14
+minBtn.Font = Enum.Font.GothamBold
+minBtn.Parent = frame
+
+local minCorner = Instance.new("UICorner")
+minCorner.CornerRadius = UDim.new(0, 4)
+minCorner.Parent = minBtn
+
+-- Close Button (X)
+local closeBtn = Instance.new("TextButton")
+closeBtn.Size = UDim2.new(0, 22, 0, 22)
+closeBtn.Position = UDim2.new(1, -26, 0, 4)
+closeBtn.BackgroundColor3 = Color3.fromRGB(180, 40, 40)
+closeBtn.Text = "X"
+closeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+closeBtn.TextSize = 11
+closeBtn.Font = Enum.Font.GothamBold
+closeBtn.Parent = frame
+
+local closeCorner = Instance.new("UICorner")
+closeCorner.CornerRadius = UDim.new(0, 4)
+closeCorner.Parent = closeBtn
+
+-- Minimized Bubble ("GUI")
+local miniBubble = Instance.new("TextButton")
+miniBubble.Size = UDim2.new(0, 50, 0, 50)
+miniBubble.Position = UDim2.new(0, 20, 0.5, -25)
+miniBubble.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
+miniBubble.Text = "GUI"
+miniBubble.TextColor3 = themeColor
+miniBubble.TextSize = 12
+miniBubble.Font = Enum.Font.GothamBold
+miniBubble.Visible = false
+miniBubble.Active = true
+miniBubble.Draggable = true
+miniBubble.ZIndex = 1000001
+miniBubble.Parent = screenGui
+
+local bubbleCorner = Instance.new("UICorner")
+bubbleCorner.CornerRadius = UDim.new(1, 0)
+bubbleCorner.Parent = miniBubble
+
+-- Confirmation Popup Frame
+local confirmOverlay = Instance.new("Frame")
+confirmOverlay.Size = UDim2.new(1, 0, 1, 0)
+confirmOverlay.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+confirmOverlay.BackgroundTransparency = 0.6
+confirmOverlay.Visible = false
+confirmOverlay.ZIndex = 2000000
+confirmOverlay.Parent = screenGui
+
+local confirmBox = Instance.new("Frame")
+confirmBox.Size = UDim2.new(0, 240, 0, 110)
+confirmBox.Position = UDim2.new(0.5, -120, 0.5, -55)
+confirmBox.BackgroundColor3 = Color3.fromRGB(25, 25, 32)
+confirmBox.BorderSizePixel = 0
+confirmBox.ZIndex = 2000001
+confirmBox.Parent = confirmOverlay
+
+local boxCorner = Instance.new("UICorner")
+boxCorner.CornerRadius = UDim.new(0, 8)
+boxCorner.Parent = confirmBox
+
+local boxStroke = Instance.new("UIStroke")
+boxStroke.Color = Color3.fromRGB(180, 40, 40)
+boxStroke.Thickness = 1.5
+boxStroke.Parent = confirmBox
+
+local confirmText = Instance.new("TextLabel")
+confirmText.Size = UDim2.new(1, -20, 0, 50)
+confirmText.Position = UDim2.new(0, 10, 0, 10)
+confirmText.BackgroundTransparency = 1
+confirmText.Text = "Are you sure you want to close this script?"
+confirmText.TextColor3 = Color3.fromRGB(240, 240, 240)
+confirmText.TextSize = 12
+confirmText.Font = Enum.Font.GothamBold
+confirmText.TextWrapped = true
+confirmText.ZIndex = 2000001
+confirmText.Parent = confirmBox
+
+local yesBtn = Instance.new("TextButton")
+yesBtn.Size = UDim2.new(0, 100, 0, 28)
+yesBtn.Position = UDim2.new(0, 15, 1, -38)
+yesBtn.BackgroundColor3 = Color3.fromRGB(180, 40, 40)
+yesBtn.Text = "Yes"
+yesBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+yesBtn.TextSize = 12
+yesBtn.Font = Enum.Font.GothamBold
+yesBtn.ZIndex = 2000001
+yesBtn.Parent = confirmBox
+
+local yesCorner = Instance.new("UICorner")
+yesCorner.CornerRadius = UDim.new(0, 6)
+yesCorner.Parent = yesBtn
+
+local noBtn = Instance.new("TextButton")
+noBtn.Size = UDim2.new(0, 100, 0, 28)
+noBtn.Position = UDim2.new(1, -115, 1, -38)
+noBtn.BackgroundColor3 = Color3.fromRGB(45, 45, 55)
+noBtn.Text = "No"
+noBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
+noBtn.TextSize = 12
+noBtn.Font = Enum.Font.GothamBold
+noBtn.ZIndex = 2000001
+noBtn.Parent = confirmBox
+
+local noCorner = Instance.new("UICorner")
+noCorner.CornerRadius = UDim.new(0, 6)
+noCorner.Parent = noBtn
+
+-- Divider
+local divider = Instance.new("Frame")
+divider.Size = UDim2.new(1, -20, 0, 1)
+divider.Position = UDim2.new(0, 10, 0, 32)
+divider.BackgroundColor3 = Color3.fromRGB(50, 50, 60)
+divider.BorderSizePixel = 0
+divider.Parent = frame
+
+-- Delay Settings
+local delayLabel = Instance.new("TextLabel")
+delayLabel.Size = UDim2.new(0, 100, 0, 20)
+delayLabel.Position = UDim2.new(0, 15, 0, 42)
+delayLabel.BackgroundTransparency = 1
+delayLabel.Text = "Delay (secs):"
+delayLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+delayLabel.TextSize = 12
+delayLabel.TextXAlignment = Enum.TextXAlignment.Left
+delayLabel.Font = Enum.Font.GothamBold
+delayLabel.Parent = frame
+
+local delayInput = Instance.new("TextBox")
+delayInput.Size = UDim2.new(0, 70, 0, 20)
+delayInput.Position = UDim2.new(1, -85, 0, 42)
+delayInput.BackgroundColor3 = Color3.fromRGB(30, 30, 38)
+delayInput.Text = "0.1"
+delayInput.TextColor3 = themeColor
+delayInput.TextSize = 12
+delayInput.Font = Enum.Font.GothamBold
+delayInput.ClearTextOnFocus = false
+delayInput.Parent = frame
+
+local inputCorner = Instance.new("UICorner")
+inputCorner.CornerRadius = UDim.new(0, 4)
+inputCorner.Parent = delayInput
+
+-- Turbo Mode Toggle Button
+local turboBtn = Instance.new("TextButton")
+turboBtn.Size = UDim2.new(1, -30, 0, 24)
+turboBtn.Position = UDim2.new(0, 15, 0, 70)
+turboBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
+turboBtn.Text = "Turbo Mode: OFF"
+turboBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
+turboBtn.TextSize = 11
+turboBtn.Font = Enum.Font.GothamBold
+turboBtn.Parent = frame
+
+local turboCorner = Instance.new("UICorner")
+turboCorner.CornerRadius = UDim.new(0, 6)
+turboCorner.Parent = turboBtn
+
+-- Double Clicks Toggle Button
+local doubleClickBtn = Instance.new("TextButton")
+doubleClickBtn.Size = UDim2.new(1, -30, 0, 24)
+doubleClickBtn.Position = UDim2.new(0, 15, 0, 100)
+doubleClickBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
+doubleClickBtn.Text = "Double Clicks: OFF"
+doubleClickBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
+doubleClickBtn.TextSize = 11
+doubleClickBtn.Font = Enum.Font.GothamBold
+doubleClickBtn.Parent = frame
+
+local doubleClickCorner = Instance.new("UICorner")
+doubleClickCorner.CornerRadius = UDim.new(0, 6)
+doubleClickCorner.Parent = doubleClickBtn
+
+-- Quadruple Clicks Toggle Button
+local quadClickBtn = Instance.new("TextButton")
+quadClickBtn.Size = UDim2.new(1, -30, 0, 24)
+quadClickBtn.Position = UDim2.new(0, 15, 0, 130)
+quadClickBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
+quadClickBtn.Text = "Quadruple Clicks: OFF"
+quadClickBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
+quadClickBtn.TextSize = 11
+quadClickBtn.Font = Enum.Font.GothamBold
+quadClickBtn.Parent = frame
+
+local quadClickCorner = Instance.new("UICorner")
+quadClickCorner.CornerRadius = UDim.new(0, 6)
+quadClickCorner.Parent = quadClickBtn
+
+-- 12 Clickers (Lag) Toggle Button
+local summon12Btn = Instance.new("TextButton")
+summon12Btn.Size = UDim2.new(1, -30, 0, 24)
+summon12Btn.Position = UDim2.new(0, 15, 0, 160)
+summon12Btn.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
+summon12Btn.Text = "12 clickers (lag): OFF"
+summon12Btn.TextColor3 = Color3.fromRGB(200, 200, 200)
+summon12Btn.TextSize = 11
+summon12Btn.Font = Enum.Font.GothamBold
+summon12Btn.Parent = frame
+
+local summon12Corner = Instance.new("UICorner")
+summon12Corner.CornerRadius = UDim.new(0, 6)
+summon12Corner.Parent = summon12Btn
+
+-- 100 Clickers (Extreme Lag) Toggle Button
+local summon100Btn = Instance.new("TextButton")
+summon100Btn.Size = UDim2.new(1, -30, 0, 24)
+summon100Btn.Position = UDim2.new(0, 15, 0, 190)
+summon100Btn.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
+summon100Btn.Text = "100 clickers (extreme lag): OFF"
+summon100Btn.TextColor3 = Color3.fromRGB(200, 200, 200)
+summon100Btn.TextSize = 11
+summon100Btn.Font = Enum.Font.GothamBold
+summon100Btn.Parent = frame
+
+local summon100Corner = Instance.new("UICorner")
+summon100Corner.CornerRadius = UDim.new(0, 6)
+summon100Corner.Parent = summon100Btn
+
+-- Set Position Button (Tap Screen to Set)
+local setPosBtn = Instance.new("TextButton")
+setPosBtn.Size = UDim2.new(1, -30, 0, 26)
+setPosBtn.Position = UDim2.new(0, 15, 0, 222)
+setPosBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
+setPosBtn.Text = "Set Position (Tap Screen)"
+setPosBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
+setPosBtn.TextSize = 11
+setPosBtn.Font = Enum.Font.GothamBold
+setPosBtn.Parent = frame
+
+local setPosCorner = Instance.new("UICorner")
+setPosCorner.CornerRadius = UDim.new(0, 6)
+setPosCorner.Parent = setPosBtn
+
+-- Toggle Start/Stop Button
+local toggleBtn = Instance.new("TextButton")
+toggleBtn.Size = UDim2.new(1, -30, 0, 32)
+toggleBtn.Position = UDim2.new(0, 15, 0, 256)
+toggleBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 38)
+toggleBtn.Text = "Start Auto Clicker"
+toggleBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
+toggleBtn.TextSize = 13
+toggleBtn.Font = Enum.Font.GothamBold
+toggleBtn.Parent = frame
+
+local btnCorner = Instance.new("UICorner")
+btnCorner.CornerRadius = UDim.new(0, 6)
+btnCorner.Parent = toggleBtn
+
+-- Status Label
+local statusLabel = Instance.new("TextLabel")
+statusLabel.Size = UDim2.new(1, -30, 0, 26)
+statusLabel.Position = UDim2.new(0, 15, 0, 296)
+statusLabel.BackgroundTransparency = 1
+statusLabel.Text = "Status: Idle (Pos: 200, 200)"
+statusLabel.TextColor3 = Color3.fromRGB(150, 150, 160)
+statusLabel.TextSize = 11
+statusLabel.Font = Enum.Font.GothamBold
+statusLabel.Parent = frame
+
+-- Core Variables
+local autoClicking = false
+local turboMode = false
+local doubleClicksActive = false
+local quadClicksActive = false
+local summon12Active = false
+local summon100Active = false
+local clickDelay = 0.1
+local targetX = 200
+local targetY = 200
+local secondTargetX = 220
+local secondTargetY = 200
+local thirdTargetX = 240
+local thirdTargetY = 200
+local fourthTargetX = 260
+local fourthTargetY = 200
+local settingPosition = false
+
+local function stopClicker()
+	autoClicking = false
+	turboMode = false
+	doubleClicksActive = false
+	quadClicksActive = false
+	summon12Active = false
+	summon100Active = false
+
+	turboBtn.Text = "Turbo Mode: OFF"
+	turboBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
+	turboBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
+
+	doubleClickBtn.Text = "Double Clicks: OFF"
+	doubleClickBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
+	doubleClickBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
+
+	quadClickBtn.Text = "Quadruple Clicks: OFF"
+	quadClickBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
+	quadClickBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
+
+	summon12Btn.Text = "12 clickers (lag): OFF"
+	summon12Btn.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
+	summon12Btn.TextColor3 = Color3.fromRGB(200, 200, 200)
+
+	summon100Btn.Text = "100 clickers (extreme lag): OFF"
+	summon100Btn.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
+	summon100Btn.TextColor3 = Color3.fromRGB(200, 200, 200)
+
+	toggleBtn.Text = "Start Auto Clicker"
+	toggleBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 38)
+	toggleBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
+	statusLabel.Text = string.format("Status: Idle (Pos: %d, %d)", targetX, targetY)
+	statusLabel.TextColor3 = Color3.fromRGB(150, 150, 160)
+end
+
+-- FIXED: Removed stopClicker() from minBtn event
+minBtn.MouseButton1Click:Connect(function()
+	frame.Visible = false
+	miniBubble.Visible = true
+end)
+
+miniBubble.MouseButton1Click:Connect(function()
+	miniBubble.Visible = false
+	frame.Visible = true
+end)
+
+closeBtn.MouseButton1Click:Connect(function()
+	confirmOverlay.Visible = true
+end)
+
+local function startClicker()
+	autoClicking = true
+	toggleBtn.Text = "Stop Auto Clicker"
+	toggleBtn.BackgroundColor3 = themeColor
+	toggleBtn.TextColor3 = Color3.fromRGB(20, 20, 25)
+	statusLabel.Text = turboMode and "Status: TURBO ACTIVE!" or "Status: Clicking..."
+	statusLabel.TextColor3 = turboMode and Color3.fromRGB(255, 69, 0) or themeColor
+end
+
+yesBtn.MouseButton1Click:Connect(function()
+	stopClicker()
+	screenGui:Destroy()
+end)
+
+noBtn.MouseButton1Click:Connect(function()
+	confirmOverlay.Visible = false
+end)
+
+delayInput.FocusLost:Connect(function()
+	local num = tonumber(delayInput.Text)
+	if num then
+		clickDelay = math.max(0, num)
+		delayInput.Text = tostring(clickDelay)
+	else
+		delayInput.Text = tostring(clickDelay)
+	end
+end)
+
+setPosBtn.MouseButton1Click:Connect(function()
+	settingPosition = true
+	setPosBtn.Text = "Tap anywhere on screen..."
+	setPosBtn.BackgroundColor3 = themeColor
+	setPosBtn.TextColor3 = Color3.fromRGB(20, 20, 25)
+end)
+
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+	if settingPosition and (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) then
+		local pos = input.Position
+		targetX = math.floor(pos.X)
+		targetY = math.floor(pos.Y)
+		secondTargetX = targetX + 25 
+		secondTargetY = targetY
+		thirdTargetX = targetX + 50
+		thirdTargetY = targetY
+		fourthTargetX = targetX + 75
+		fourthTargetY = targetY
+		
+		settingPosition = false
+		setPosBtn.Text = "Set Position (Tap Screen)"
+		setPosBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
+		setPosBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
+		
+		if not autoClicking then
+			statusLabel.Text = string.format("Status: Idle (Pos: %d, %d)", targetX, targetY)
+		end
+	end
+end)
+
+turboBtn.MouseButton1Click:Connect(function()
+	turboMode = not turboMode
+	if turboMode then
+		turboBtn.Text = "Turbo Mode: ON"
+		turboBtn.BackgroundColor3 = Color3.fromRGB(255, 69, 0)
+		turboBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+		startClicker()
+	else
+		turboBtn.Text = "Turbo Mode: OFF"
+		turboBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
+		turboBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
+		stopClicker()
+	end
+end)
+
+doubleClickBtn.MouseButton1Click:Connect(function()
+	doubleClicksActive = not doubleClicksActive
+	if doubleClicksActive then
+		doubleClickBtn.Text = "Double Clicks: ON"
+		doubleClickBtn.BackgroundColor3 = themeColor
+		doubleClickBtn.TextColor3 = Color3.fromRGB(20, 20, 25)
+		if not autoClicking then
+			startClicker()
+		end
+	else
+		doubleClickBtn.Text = "Double Clicks: OFF"
+		doubleClickBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
+		doubleClickBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
+		if not quadClicksActive and not summon12Active and not summon100Active then
+			stopClicker()
+		end
+	end
+end)
+
+quadClickBtn.MouseButton1Click:Connect(function()
+	quadClicksActive = not quadClicksActive
+	if quadClicksActive then
+		quadClickBtn.Text = "Quadruple Clicks: ON"
+		quadClickBtn.BackgroundColor3 = themeColor
+		quadClickBtn.TextColor3 = Color3.fromRGB(20, 20, 25)
+		
+		doubleClicksActive = true
+		doubleClickBtn.Text = "Double Clicks: ON"
+		doubleClickBtn.BackgroundColor3 = themeColor
+		doubleClickBtn.TextColor3 = Color3.fromRGB(20, 20, 25)
+
+		turboMode = true
+		turboBtn.Text = "Turbo Mode: ON"
+		turboBtn.BackgroundColor3 = Color3.fromRGB(255, 69, 0)
+		turboBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+
+		startClicker()
+	else
+		quadClickBtn.Text = "Quadruple Clicks: OFF"
+		quadClickBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
+		quadClickBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
+		stopClicker()
+	end
+end)
+
+-- 12 Clickers Handler
+summon12Btn.MouseButton1Click:Connect(function()
+	summon12Active = not summon12Active
+	if summon12Active then
+		summon12Btn.Text = "12 clickers (lag): ON"
+		summon12Btn.BackgroundColor3 = themeColor
+		summon12Btn.TextColor3 = Color3.fromRGB(20, 20, 25)
+
+		quadClicksActive = true
+		quadClickBtn.Text = "Quadruple Clicks: ON"
+		quadClickBtn.BackgroundColor3 = themeColor
+		quadClickBtn.TextColor3 = Color3.fromRGB(20, 20, 25)
+
+		doubleClicksActive = true
+		doubleClickBtn.Text = "Double Clicks: ON"
+		doubleClickBtn.BackgroundColor3 = themeColor
+		doubleClickBtn.TextColor3 = Color3.fromRGB(20, 20, 25)
+
+		turboMode = true
+		turboBtn.Text = "Turbo Mode: ON"
+		turboBtn.BackgroundColor3 = Color3.fromRGB(255, 69, 0)
+		turboBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+
+		startClicker()
+	else
+		stopClicker()
+	end
+end)
+
+-- 100 Clickers Handler
+summon100Btn.MouseButton1Click:Connect(function()
+	summon100Active = not summon100Active
+	if summon100Active then
+		summon100Btn.Text = "100 clickers (extreme lag): ON"
+		summon100Btn.BackgroundColor3 = themeColor
+		summon100Btn.TextColor3 = Color3.fromRGB(20, 20, 25)
+
+		summon12Active = true
+		summon12Btn.Text = "12 clickers (lag): ON"
+		summon12Btn.BackgroundColor3 = themeColor
+		summon12Btn.TextColor3 = Color3.fromRGB(20, 20, 25)
+
+		quadClicksActive = true
+		quadClickBtn.Text = "Quadruple Clicks: ON"
+		quadClickBtn.BackgroundColor3 = themeColor
+		quadClickBtn.TextColor3 = Color3.fromRGB(20, 20, 25)
+
+		doubleClicksActive = true
+		doubleClickBtn.Text = "Double Clicks: ON"
+		doubleClickBtn.BackgroundColor3 = themeColor
+		doubleClickBtn.TextColor3 = Color3.fromRGB(20, 20, 25)
+
+		turboMode = true
+		turboBtn.Text = "Turbo Mode: ON"
+		turboBtn.BackgroundColor3 = Color3.fromRGB(255, 69, 0)
+		turboBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+
+		startClicker()
+	else
+		stopClicker()
+	end
+end)
+
+toggleBtn.MouseButton1Click:Connect(function()
+	if autoClicking then
+		stopClicker()
+	else
+		startClicker()
+	end
+end)
+
+-- Primary Auto Clicker Engine
+task.spawn(function()
+	local counter = 2000
+	while true do
+		if autoClicking then
+			local activeDelay = turboMode and 0.001 or clickDelay
+			local inset = GuiService:GetGuiInset()
+			local clickX = targetX
+			local clickY = targetY + inset.Y
+
+			counter = counter + 1
+			local currentTouchId = counter
+
+			pcall(function()
+				VirtualInputManager:SendTouchEvent(currentTouchId, Enum.UserInputState.Begin.Value, clickX, clickY)
+				VirtualInputManager:SendTouchEvent(currentTouchId, Enum.UserInputState.End.Value, clickX, clickY)
+			end)
+			
+			if activeDelay > 0.01 then
+				task.wait(activeDelay)
+			else
+				task.wait()
+			end
+		else
+			task.wait(0.1)
+		end
+	end
+end)
+
+-- Secondary Auto Clicker Engine
+task.spawn(function()
+	local counter = 6000
+	while true do
+		if autoClicking and (doubleClicksActive or quadClicksActive) then
+			local activeDelay = turboMode and 0.001 or clickDelay
+			local inset = GuiService:GetGuiInset()
+			local clickX = secondTargetX
+			local clickY = secondTargetY + inset.Y
+
+			counter = counter + 1
+			local currentTouchId = counter
+
+			pcall(function()
+				VirtualInputManager:SendTouchEvent(currentTouchId, Enum.UserInputState.Begin.Value, clickX, clickY)
+				VirtualInputManager:SendTouchEvent(currentTouchId, Enum.UserInputState.End.Value, clickX, clickY)
+			end)
+			
+			if activeDelay > 0.01 then
+				task.wait(activeDelay)
+			else
+				task.wait()
+			end
+		else
+			task.wait(0.1)
+		end
+	end
+end)
+
+-- Third Auto Clicker Engine
+task.spawn(function()
+	local counter = 10000
+	while true do
+		if autoClicking and quadClicksActive then
+			local activeDelay = turboMode and 0.001 or clickDelay
+			local inset = GuiService:GetGuiInset()
+			local clickX = thirdTargetX
+			local clickY = thirdTargetY + inset.Y
+
+			counter = counter + 1
+			local currentTouchId = counter
+
+			pcall(function()
+				VirtualInputManager:SendTouchEvent(currentTouchId, Enum.UserInputState.Begin.Value, clickX, clickY)
+				VirtualInputManager:SendTouchEvent(currentTouchId, Enum.UserInputState.End.Value, clickX, clickY)
+			end)
+			
+			if activeDelay > 0.01 then
+				task.wait(activeDelay)
+			else
+				task.wait()
+			end
+		else
+			task.wait(0.1)
+		end
+	end
+end)
+
+-- Fourth Auto Clicker Engine
+task.spawn(function()
+	local counter = 14000
+	while true do
+		if autoClicking and quadClicksActive then
+			local activeDelay = turboMode and 0.001 or clickDelay
+			local inset = GuiService:GetGuiInset()
+			local clickX = fourthTargetX
+			local clickY = fourthTargetY + inset.Y
+
+			counter = counter + 1
+			local currentTouchId = counter
+
+			pcall(function()
+				VirtualInputManager:SendTouchEvent(currentTouchId, Enum.UserInputState.Begin.Value, clickX, clickY)
+				VirtualInputManager:SendTouchEvent(currentTouchId, Enum.UserInputState.End.Value, clickX, clickY)
+			end)
+			
+			if activeDelay > 0.01 then
+				task.wait(activeDelay)
+			else
+				task.wait()
+			end
+		else
+			task.wait(0.1)
+		end
+	end
+end)
+
+-- 12 Extra Headless Clickers Loop
+for i = 1, 12 do
+	task.spawn(function()
+		local counter = 20000 + (i * 2000)
+		while true do
+			if autoClicking and summon12Active then
+				local activeDelay = turboMode and 0.001 or clickDelay
+				local inset = GuiService:GetGuiInset()
+				local clickX = targetX + (i * 15)
+				local clickY = targetY + inset.Y
+
+				counter = counter + 1
+				local currentTouchId = counter
+
+				pcall(function()
+					VirtualInputManager:SendTouchEvent(currentTouchId, Enum.UserInputState.Begin.Value, clickX, clickY)
+					VirtualInputManager:SendTouchEvent(currentTouchId, Enum.UserInputState.End.Value, clickX, clickY)
+				end)
+				
+				if activeDelay > 0.01 then
+					task.wait(activeDelay)
+				else
+					task.wait()
+				end
+			else
+				task.wait(0.1)
+			end
+		end
+	end)
+end
+
+-- 100 Extra Headless Clickers Loop
+for i = 1, 100 do
+	task.spawn(function()
+		local counter = 50000 + (i * 2000)
+		while true do
+			if autoClicking and summon100Active then
+				local activeDelay = turboMode and 0.001 or clickDelay
+				local inset = GuiService:GetGuiInset()
+				local clickX = targetX + ((i % 10) * 5)
+				local clickY = targetY + inset.Y + (math.floor(i / 10) * 5)
+
+				counter = counter + 1
+				local currentTouchId = counter
+
+				pcall(function()
+					VirtualInputManager:SendTouchEvent(currentTouchId, Enum.UserInputState.Begin.Value, clickX, clickY)
+					VirtualInputManager:SendTouchEvent(currentTouchId, Enum.UserInputState.End.Value, clickX, clickY)
+				end)
+				
+				if activeDelay > 0.01 then
+					task.wait(activeDelay)
+				else
+					task.wait()
+				end
+			else
+				task.wait(0.1)
+			end
+		end
+	end)
+end
