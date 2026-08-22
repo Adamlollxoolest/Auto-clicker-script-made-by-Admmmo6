@@ -342,7 +342,6 @@ local function stopClicker()
 	summon100Active = false
 	settingPosition = false
 
-	-- Instantly clear stuck touch inputs to restore camera movement
 	pcall(function()
 		for i = 1, 60000 do
 			VirtualInputManager:SendTouchEvent(i, Enum.UserInputState.End.Value, 0, 0)
@@ -390,10 +389,33 @@ local function restoreGui()
 	frame.Visible = true
 end
 
-miniBubble.MouseButton1Click:Connect(restoreGui)
-miniBubble.Activated:Connect(restoreGui)
+-- Fix: Track dragging vs tapping so you can move the mini bubble without it opening
+local bubbleDragging = false
+local bubbleStartPos = Vector2.new(0, 0)
+
 miniBubble.InputBegan:Connect(function(input)
 	if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
+		bubbleDragging = false
+		bubbleStartPos = Vector2.new(input.Position.X, input.Position.Y)
+	end
+end)
+
+miniBubble.InputChanged:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+		if (Vector2.new(input.Position.X, input.Position.Y) - bubbleStartPos).Magnitude > 8 then
+			bubbleDragging = true
+		end
+	end
+end)
+
+miniBubble.MouseButton1Click:Connect(function()
+	if not bubbleDragging then
+		restoreGui()
+	end
+end)
+
+miniBubble.TouchTap:Connect(function()
+	if not bubbleDragging then
 		restoreGui()
 	end
 end)
