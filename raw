@@ -101,7 +101,7 @@ local closeCorner = Instance.new("UICorner")
 closeCorner.CornerRadius = UDim.new(0, 4)
 closeCorner.Parent = closeBtn
 
--- Minimized Bubble ("GUI")
+-- Minimized Bubble ("GUI") - Outline Removed
 local miniBubble = Instance.new("TextButton")
 miniBubble.Size = UDim2.new(0, 50, 0, 50)
 miniBubble.Position = UDim2.new(0, 20, 0.5, -25)
@@ -119,11 +119,6 @@ miniBubble.Parent = screenGui
 local bubbleCorner = Instance.new("UICorner")
 bubbleCorner.CornerRadius = UDim.new(1, 0)
 bubbleCorner.Parent = miniBubble
-
-local bubbleStroke = Instance.new("UIStroke")
-bubbleStroke.Color = brightGreen
-bubbleStroke.Thickness = 2
-bubbleStroke.Parent = miniBubble
 
 -- Confirmation Popup Frame
 local confirmOverlay = Instance.new("Frame")
