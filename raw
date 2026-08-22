@@ -342,12 +342,6 @@ local function stopClicker()
 	summon100Active = false
 	settingPosition = false
 
-	pcall(function()
-		for i = 1, 60000 do
-			VirtualInputManager:SendTouchEvent(i, Enum.UserInputState.End.Value, 0, 0)
-		end
-	end)
-
 	turboBtn.Text = "Turbo Mode: OFF"
 	turboBtn.BackgroundColor3 = Color3.fromRGB(25, 38, 30)
 	turboBtn.TextColor3 = Color3.fromRGB(200, 220, 200)
@@ -389,7 +383,6 @@ local function restoreGui()
 	frame.Visible = true
 end
 
--- Fix: Track dragging vs tapping so you can move the mini bubble without it opening
 local bubbleDragging = false
 local bubbleStartPos = Vector2.new(0, 0)
 
